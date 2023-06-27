@@ -50,68 +50,51 @@ export function getBotDates(): IGetDatesRespose {
   return { todayFormatted, laterFormatted };
 }
 
-export function formatDateRange(startDate: string, endDate: string): string {
-  const today = new Date();
-  const tomorrow = new Date(today);
-  tomorrow.setDate(tomorrow.getDate() + 1);
+function getDayOrdinal(day: number): string {
+  if (day >= 11 && day <= 13) {
+    return `${day}th`;
+  }
 
+  switch (day % 10) {
+    case 1:
+      return `${day}st`;
+    case 2:
+      return `${day}nd`;
+    case 3:
+      return `${day}rd`;
+    default:
+      return `${day}th`;
+  }
+}
+
+function formatDateRange(startDate: string, endDate: string) {
   const start = new Date(startDate);
   const end = endDate ? new Date(endDate) : start;
 
-  if (start.toDateString() === today.toDateString() && end.toDateString() === today.toDateString()) {
-    return 'Today';
-  } if (start.toDateString() === tomorrow.toDateString() && end.toDateString() === tomorrow.toDateString()) {
-    return 'Tomorrow';
-  } if (start.toDateString() === today.toDateString() && end.toDateString() === tomorrow.toDateString()) {
-    return 'Today, Tomorrow';
+  const options: Intl.DateTimeFormatOptions = { month: 'long', day: 'numeric' };
+
+  const dateRange = [];
+  const currentDate = new Date(start);
+
+  while (currentDate <= end) {
+    const formattedDate = currentDate.toLocaleDateString('en-US', options);
+    const dayOrdinal = getDayOrdinal(currentDate.getDate());
+    const formattedDateRange = `${formattedDate.split(' ')[0]} ${dayOrdinal}`;
+    dateRange.push(formattedDateRange);
+    currentDate.setDate(currentDate.getDate() + 1);
   }
-    const options: Intl.DateTimeFormatOptions = { month: '2-digit', day: '2-digit' };
 
-    const dateRange = [];
-    const currentDate = new Date(start);
-
-    while (currentDate <= end) {
-      dateRange.push(currentDate.toLocaleString('en-US', options));
-      currentDate.setDate(currentDate.getDate() + 1);
-    }
-
-    return dateRange.join(', ');
+  return dateRange.join(', ');
 }
 
 export async function postReportMessage(timeOffInfo: IGetTimeOffResponseBody): Promise<void> {
-  const { startDate, endDate, note, timeOffPeriod, user, time } = timeOffInfo;
+  const { startDate, endDate, timeOffPeriod, user, time } = timeOffInfo;
   const formatedTime: number = time ? time / 3600 : 0;
   const formatedDateRange = formatDateRange(startDate, endDate);
-  const attachments = [
-    {
-      fields: [
-        {
-          title: 'Name',
-          value: user.name
-        },
-        {
-          title: 'Date',
-          value: formatedDateRange
-        },
-        {
-          title: 'Time Off Period',
-          value: timeOffPeriod ?? `${formatedTime.toFixed(0)}h per day`
-        },
-      ],
-      color: '#43c47e',
-    }
-  ];
 
-  if (note) {
-    attachments[0].fields.push({
-      title: 'Note',
-      value: note,
-    });
-  }
    await postMessage({
     channelID: process.env.REPORT_CHANNEL_ID ?? '',
-    message: `I just got a new time off report by *${user.name}* for the *Team Status*. Check it out:`,
-    attachments
+    message: `🟡 *${user.name}* is Off on *${formatedDateRange} (${timeOffPeriod ?? `${formatedTime.toFixed(0)}h per day`})*`,
   });
 }
 
