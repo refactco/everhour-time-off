@@ -3,6 +3,7 @@ frameworkVersion: '3'
 
 provider:
   name: aws
+  timeout: 30
   environment:
     EVER_HOUR_API: 
     EVER_HOUR_TOKEN: 
@@ -33,4 +34,4 @@ functions:
     handler: report.run
     events:
       # Invoke Lambda function 05:00 AM (UTC+0) every day
-      - schedule: cron(00 00 * * ? *)
+      - schedule: cron(00 05 * * ? *)
