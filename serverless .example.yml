@@ -1,0 +1,29 @@
+service: everhour-and-google-calendar
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  environment:
+    EVER_HOUR_API: 
+    EVER_HOUR_TOKEN: 
+    TIME_ZONE: 
+    SLACK_BOT_TOKEN: 
+    REPORT_CHANNEL_ID: 
+  runtime: nodejs18.x
+
+	
+package:
+  patterns:
+    - 'token.json'
+    - 'credentials.json'
+	
+plugins:
+  - serverless-plugin-typescript
+  - serverless-tscpaths
+
+functions:
+  cronHandler:
+    handler: index.run
+    events:
+      # Invoke Lambda function every 30 minutes
+      - schedule: rate(30 minutes)

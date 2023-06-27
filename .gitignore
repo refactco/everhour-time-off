@@ -1,0 +1,7 @@
+node_modules
+.serverless
+package-lock.json
+.build
+credentials.json
+token.json
+serverless.yml
