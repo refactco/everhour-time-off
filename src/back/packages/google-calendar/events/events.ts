@@ -54,10 +54,6 @@ export async function insertEvent(
     calendarId: timeOffCalendarId,
     requestBody: event,
   });
-
-  // if (status === 'approved') {
-  //   postReportMessage(timeOffInfo);
-  // }
 }
 export async function updateEvent(
   calendar:calendar_v3.Calendar,
@@ -85,10 +81,6 @@ export async function updateEvent(
     eventId: eventId ?? '',
     requestBody: event,
   });
-
-  // if (status === 'approved') {
-  //   postReportMessage(timeOffInfo);
-  // }
 }
 
 export async function deleteEvent(calendar: calendar_v3.Calendar, eventId: string | null | undefined, timeOffCalendarId: string) {

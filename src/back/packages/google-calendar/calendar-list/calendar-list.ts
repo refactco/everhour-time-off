@@ -11,7 +11,7 @@ export async function getTimeOffCalendarId(auth: Auth.OAuth2Client): Promise<str
         // eslint-disable-next-line no-restricted-syntax
         for (const calendarInfo of calendars) {
             const { id, summary } = calendarInfo;
-            if (summary === 'Time Off') {
+            if (summary === process.env.CALENDAR_NAME ?? 'Time Off') {
                 return id;
             }
         }
