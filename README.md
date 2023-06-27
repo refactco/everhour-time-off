@@ -16,7 +16,6 @@ Here are the steps you should follow to get started on this project:
  11. Click **Create**. The OAuth client created screen appears, showing your new Client ID and Client secret.
  12. Click **OK**. The newly created credential appears under **OAuth 2.0 Client IDs**.
  13. Save the downloaded JSON file as `credentials.json`, and move the file to your working directory.
- 14. Create a new calendar with the name `Time Off` in your calendars.
 ### Slack
  1. Create a new slack workspace or use an existing one.
  2. Go to [api.slack.com](https://api.slack.com/) and click on `Create New App` button.
@@ -33,7 +32,7 @@ Here are the steps you should follow to get started on this project:
     * users:read
     * users:read.email
   7. On the `left-side panel`, click on `OAuth & Permissions` and copy `Bot User OAuth Token`.
-  8. Add Bot as a member in the channel you want to send the report.
+  8. Add Bot  in the channel you want to send the report.
 ### Everhour
  1. Go to [app.everhour.com](https://app.everhour.com/#/account/profile).
  2. On the `left-side panel`, click on `Setting`.
