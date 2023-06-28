@@ -9,8 +9,8 @@ provider:
     EVER_HOUR_TOKEN: 
     TIME_ZONE: 
     SLACK_BOT_TOKEN: 
-    REPORT_CHANNEL_ID:
-    CALENDAR_NAME:
+    REPORT_CHANNEL_ID: 
+    CALENDAR_NAME: Time Off
   runtime: nodejs18.x
 
 	
@@ -18,7 +18,8 @@ package:
   patterns:
     - 'token.json'
     - 'credentials.json'
-    - 'report.ts'
+    - 'daily-report.ts'
+    - 'weekly-report.ts'
 	
 plugins:
   - serverless-plugin-typescript
@@ -30,8 +31,13 @@ functions:
     events:
       # Invoke Lambda function every 30 minutes
       - schedule: rate(30 minutes)
-  reportHandler:
-    handler: report.run
+  dailyReportHandler:
+    handler: daily-report.run
     events:
       # Invoke Lambda function 05:00 AM (UTC+0) every day
       - schedule: cron(00 05 * * ? *)
+  weeklyReportHandler:
+    handler: weekly-report.run
+    events:
+      # Invoke Lambda function 04:30 AM (UTC+0) every day
+      - schedule: cron(30 04 ? * SUN *)

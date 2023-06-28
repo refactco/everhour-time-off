@@ -31,7 +31,7 @@ export function getDates(): IGetDatesRespose {
   return { todayFormatted, laterFormatted };
 }
 
-export function getBotDates(): IGetDatesRespose {
+export function getDailyDates(): IGetDatesRespose {
   // Today's date
   const today: Date = new Date();
   const todayYear: number = today.getFullYear();
@@ -39,82 +39,156 @@ export function getBotDates(): IGetDatesRespose {
   const todayDay: string = String(today.getDate()).padStart(2, '0');
   const todayFormatted: string = `${todayYear}-${todayMonth}-${todayDay}`;
 
-  // Two Days later
-  const twoDaysLater : Date = new Date();
-  twoDaysLater.setDate(today.getDate() + 2);
-  const laterYear: number = twoDaysLater.getFullYear();
-  const laterMonth: string = String(twoDaysLater.getMonth() + 1).padStart(2, '0');
-  const laterDay: string = String(twoDaysLater.getDate()).padStart(2, '0');
+  // One Days later
+  const oneDayLater : Date = new Date();
+  oneDayLater.setDate(today.getDate() + 1);
+  const laterYear: number = oneDayLater.getFullYear();
+  const laterMonth: string = String(oneDayLater.getMonth() + 1).padStart(2, '0');
+  const laterDay: string = String(oneDayLater.getDate()).padStart(2, '0');
+  const laterFormatted: string = `${laterYear}-${laterMonth}-${laterDay}`;
+
+  return { todayFormatted, laterFormatted };
+}
+export function getWeeklyDates(): IGetDatesRespose {
+  // Today's date
+  const today: Date = new Date();
+  const todayYear: number = today.getFullYear();
+  const todayMonth: string = String(today.getMonth() + 1).padStart(2, '0');
+  const todayDay: string = String(today.getDate()).padStart(2, '0');
+  const todayFormatted: string = `${todayYear}-${todayMonth}-${todayDay}`;
+
+  // One week later
+  const oneWeekLater: Date = new Date();
+  oneWeekLater.setDate(today.getDate() + 7);
+  const laterYear: number = oneWeekLater.getFullYear();
+  const laterMonth: string = String(oneWeekLater.getMonth() + 1).padStart(2, '0');
+  const laterDay: string = String(oneWeekLater.getDate()).padStart(2, '0');
   const laterFormatted: string = `${laterYear}-${laterMonth}-${laterDay}`;
 
   return { todayFormatted, laterFormatted };
 }
 
-export function formatDateRange(startDate: string, endDate: string): string {
-  const today = new Date();
-  const tomorrow = new Date(today);
-  tomorrow.setDate(tomorrow.getDate() + 1);
+function getDayOrdinal(day: number): string {
+  if (day >= 11 && day <= 13) {
+    return `${day}th`;
+  }
 
+  switch (day % 10) {
+    case 1:
+      return `${day}st`;
+    case 2:
+      return `${day}nd`;
+    case 3:
+      return `${day}rd`;
+    default:
+      return `${day}th`;
+  }
+}
+
+export function formatDateRange(startDate: string, endDate: string) {
   const start = new Date(startDate);
   const end = endDate ? new Date(endDate) : start;
 
-  if (start.toDateString() === today.toDateString() && end.toDateString() === today.toDateString()) {
-    return 'Today';
-  } if (start.toDateString() === tomorrow.toDateString() && end.toDateString() === tomorrow.toDateString()) {
-    return 'Tomorrow';
-  } if (start.toDateString() === today.toDateString() && end.toDateString() === tomorrow.toDateString()) {
-    return 'Today, Tomorrow';
-  }
-    const options: Intl.DateTimeFormatOptions = { month: '2-digit', day: '2-digit' };
+  const options: Intl.DateTimeFormatOptions = { month: 'long', day: 'numeric' };
 
-    const dateRange = [];
-    const currentDate = new Date(start);
+  const dateRange = [];
+  const currentDate = new Date(start);
 
-    while (currentDate <= end) {
-      dateRange.push(currentDate.toLocaleString('en-US', options));
-      currentDate.setDate(currentDate.getDate() + 1);
+  while (currentDate <= end) {
+    const today = new Date();
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+
+    if (currentDate.toDateString() === today.toDateString()) {
+      dateRange.push('Today');
+    } else if (currentDate.toDateString() === tomorrow.toDateString()) {
+      dateRange.push('Tomorrow');
+    } else {
+      const formattedDate = currentDate.toLocaleDateString('en-US', options);
+      const dayOrdinal = getDayOrdinal(currentDate.getDate());
+      const formattedDateRange = `${formattedDate.split(' ')[0]} ${dayOrdinal}`;
+      dateRange.push(formattedDateRange);
     }
 
-    return dateRange.join(', ');
+    currentDate.setDate(currentDate.getDate() + 1);
+  }
+
+  return dateRange.join(', ');
+}
+export function createReportMessage(
+  username: string,
+  formatedDateRange: string,
+  timeOffPeriod: string | undefined,
+  formatedTime: number
+): string {
+  const formatedDateRangeArray = formatedDateRange.split(', ');
+  let days: string = '';
+
+  if (formatedDateRangeArray.length === 1 && formatedDateRangeArray[0] === 'Today') {
+    days = ` ${formatedDateRangeArray[0]}`;
+  } else if (formatedDateRangeArray.length === 1 && formatedDateRangeArray[0] === 'Tomorrow') {
+    days = ` ${formatedDateRangeArray[0]}`;
+  } else if (formatedDateRangeArray.length === 2 && formatedDateRangeArray[1] === 'Tomorrow') {
+    days = ` ${formatedDateRangeArray[0]} and ${formatedDateRangeArray[1]}`;
+  } else if (formatedDateRangeArray.length === 1 && formatedDateRangeArray[0] !== 'Today') {
+    days = ` on ${formatedDateRangeArray.join(', ')}`;
+  } else if (formatedDateRangeArray.length === 2 && formatedDateRangeArray[0] !== 'Tomorrow') {
+    days = ` on ${formatedDateRangeArray.join(', ')}`;
+  } else if (formatedDateRangeArray.length === 2 && formatedDateRangeArray[0] === 'Tomorrow') {
+    days = `${formatedDateRangeArray[0]}, on ${formatedDateRangeArray.join(', ')}`;
+  } else if (formatedDateRangeArray.length > 2
+    && formatedDateRangeArray[0] === 'Today'
+    && formatedDateRangeArray[1] === 'Tomorrow'
+    )
+    {
+    const lastDate = [...formatedDateRangeArray].splice(0, 1);
+    logger(formatedDateRangeArray);
+    const formattedDates = lastDate.join(', ');
+    days = ` ${formatedDateRangeArray[0]}, ${formatedDateRangeArray[1]}, on ${formattedDates})`;
+  } else {
+    days = ` on ${formatedDateRangeArray.join(', ')}`;
+  }
+
+  return `🟡 *${username}* is Off  *${days} (${timeOffPeriod ?? `${formatedTime.toFixed(0)}h per day`})*`;
 }
 
 export async function postReportMessage(timeOffInfo: IGetTimeOffResponseBody): Promise<void> {
-  const { startDate, endDate, note, timeOffPeriod, user, time } = timeOffInfo;
+  const { startDate, endDate, timeOffPeriod, user, time } = timeOffInfo;
   const formatedTime: number = time ? time / 3600 : 0;
-  const formatedDateRange = formatDateRange(startDate, endDate);
-  const attachments = [
-    {
-      fields: [
-        {
-          title: 'Name',
-          value: user.name
-        },
-        {
-          title: 'Date',
-          value: formatedDateRange
-        },
-        {
-          title: 'Time Off Period',
-          value: timeOffPeriod ?? `${formatedTime.toFixed(0)}h per day`
-        },
-      ],
-      color: '#43c47e',
-    }
-  ];
+  const formatedDateRange: string = formatDateRange(startDate, endDate);
+  const reportMessage: string = createReportMessage(user.name, formatedDateRange, timeOffPeriod, formatedTime);
 
-  if (note) {
-    attachments[0].fields.push({
-      title: 'Note',
-      value: note,
-    });
-  }
    await postMessage({
     channelID: process.env.REPORT_CHANNEL_ID ?? '',
-    message: `I just got a new time off report by *${user.name}* for the *Team Status*. Check it out:`,
-    attachments
+    message: reportMessage,
   });
 }
 
 export function createSummary(status: string, name: string, timeOffPeriod: string | undefined, formatedTime: number) {
   return `${status === 'pending' ? '[pending]' : ''}${name} [${timeOffPeriod ?? `${formatedTime.toFixed(0)}h per day`}]`;
+}
+
+export function getOneEndDayLater(endDate: string): string {
+const oneDayLaterdate: Date = new Date(endDate);
+oneDayLaterdate.setDate(oneDayLaterdate.getDate() + 1);
+
+// Format the date as YYYY-MM-DD
+const year: number = oneDayLaterdate.getFullYear();
+const month: string = String(oneDayLaterdate.getMonth() + 1).padStart(2, '0');
+const day: string = String(oneDayLaterdate.getDate()).padStart(2, '0');
+
+const newDate: string = `${year}-${month}-${day}`;
+
+return newDate;
+}
+
+export function extractStatus(description: string) {
+  const regex = /Status: (.+)/;
+  const match = description.match(regex);
+  let status: string = '';
+  if (match && match.length > 1) {
+    // eslint-disable-next-line prefer-destructuring
+    status = match[1];
+  }
+  return status;
 }

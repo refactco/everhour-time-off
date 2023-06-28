@@ -1,9 +1,9 @@
-import { getBotDates, logger } from '@common/common-function';
+import { getWeeklyDates, logger } from '@common/common-function';
 import axios, { AxiosResponse } from 'axios';
 import type { IGetTimeOffRequestBody, IGetTimeOffResponseBody } from '@back/everhour/get-timeoff/get-timeoff-interface';
 
-export async function getTimeOffBot(): Promise<IGetTimeOffResponseBody[] | []> {
-  const { todayFormatted, laterFormatted } = getBotDates();
+export async function getWeeklyTimeOff(): Promise<IGetTimeOffResponseBody[] | []> {
+  const { todayFormatted, laterFormatted } = getWeeklyDates();
   try {
     const { data, status } = await axios
         .get<IGetTimeOffResponseBody[], AxiosResponse<IGetTimeOffResponseBody[]>, IGetTimeOffRequestBody>(
