@@ -1,11 +1,12 @@
 import { IGetTimeOffResponseBody } from '@back/everhour/get-timeoff/get-timeoff-interface';
 import { postReportMessage } from '@common/common-function';
 
-export async function reportHandler(timeOffData:IGetTimeOffResponseBody[]) {
+export async function dailyReportHandler(timeOffData:IGetTimeOffResponseBody[]) {
     // eslint-disable-next-line no-restricted-syntax
     for (const timeOffItem of timeOffData) {
         if (timeOffItem.status === 'approved') {
-            postReportMessage(timeOffItem);
+            // eslint-disable-next-line no-await-in-loop
+            await postReportMessage(timeOffItem);
         }
     }
 }

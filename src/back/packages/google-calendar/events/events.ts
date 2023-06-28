@@ -2,7 +2,7 @@
 /* eslint-disable no-await-in-loop */
 /* eslint-disable camelcase */
 import { google, Auth, calendar_v3 } from 'googleapis';
-import { createSummary, getDates, logger } from '@common/common-function';
+import { createSummary, extractStatus, getDates, getOneEndDayLater, logger, postReportMessage } from '@common/common-function';
 import { GaxiosResponse } from 'gaxios';
 import type { IGetTimeOffResponseBody } from '@back/everhour/get-timeoff/get-timeoff-interface';
 import { OAuth2Client } from 'google-auth-library';
@@ -34,9 +34,10 @@ export async function insertEvent(
   timeOffInfo:IGetTimeOffResponseBody,
   timeOffCalendarId: string
   ) {
-  const { startDate, endDate, note, status, timeOffPeriod, user, time, approvedBy } = timeOffInfo;
+  const { startDate, endDate, note, status, timeOffPeriod, user, time, approvedBy, days } = timeOffInfo;
   const formatedTime: number = time ? time / 3600 : 0;
   const summary = createSummary(status, user.name, timeOffPeriod, formatedTime);
+  const oneDayEndLater : string = getOneEndDayLater(endDate);
   const event = {
     'summary': summary,
     // eslint-disable-next-line max-len
@@ -46,23 +47,28 @@ export async function insertEvent(
       'timeZone': process.env.TIME_ZONE ?? 'America/Los_Angeles',
     },
     'end': {
-      'date': endDate,
+      'date': days > 1 ? oneDayEndLater.toString() : endDate,
       'timeZone': process.env.TIME_ZONE ?? 'America/Los_Angeles',
     },
   };
-  await calendar.events.insert({
-    calendarId: timeOffCalendarId,
-    requestBody: event,
-  });
+  try {
+    await calendar.events.insert({
+      calendarId: timeOffCalendarId,
+      requestBody: event,
+    });
+  } catch (error) {
+    logger(error);
+  }
 }
 export async function updateEvent(
   calendar:calendar_v3.Calendar,
   timeOffInfo:IShouldUpdatedEvents,
   timeOffCalendarId: string
   ) {
-  const { startDate, endDate, note, status, timeOffPeriod, user, time, eventId, approvedBy } = timeOffInfo;
+  const { startDate, endDate, note, status, timeOffPeriod, user, time, eventId, approvedBy, days } = timeOffInfo;
   const formatedTime: number = time ? time / 3600 : 0;
-  const summary = createSummary(status, user.name, timeOffPeriod, formatedTime);
+  const summary: string = createSummary(status, user.name, timeOffPeriod, formatedTime);
+  const oneDayEndLater : string = getOneEndDayLater(endDate);
   const event = {
     'summary': summary,
     // eslint-disable-next-line max-len
@@ -72,22 +78,30 @@ export async function updateEvent(
       'timeZone': process.env.TIME_ZONE ?? 'America/Los_Angeles',
     },
     'end': {
-      'date': endDate,
+      'date': days > 1 ? oneDayEndLater.toString() : endDate,
       'timeZone': process.env.TIME_ZONE ?? 'America/Los_Angeles',
     },
   };
-  await calendar.events.update({
-    calendarId: timeOffCalendarId,
-    eventId: eventId ?? '',
-    requestBody: event,
-  });
+  try {
+    await calendar.events.update({
+      calendarId: timeOffCalendarId,
+      eventId: eventId ?? '',
+      requestBody: event,
+    });
+  } catch (error) {
+    logger(error);
+  }
 }
 
 export async function deleteEvent(calendar: calendar_v3.Calendar, eventId: string | null | undefined, timeOffCalendarId: string) {
-  await calendar.events.delete({
-    calendarId: timeOffCalendarId,
-    eventId: eventId ?? '',
-  });
+  try {
+    await calendar.events.delete({
+      calendarId: timeOffCalendarId,
+      eventId: eventId ?? '',
+    });
+  } catch (error) {
+    logger(error);
+  }
 }
 
 export async function handleEvent(
@@ -99,18 +113,25 @@ export async function handleEvent(
   // eslint-disable-next-line no-restricted-syntax
   const existingEvents: calendar_v3.Schema$Event[] = await listEvents(auth, timeOffCalendarId);
   const shouldUpdateEvents:IShouldUpdatedEvents[] = [];
+  const shouldSendReport : IGetTimeOffResponseBody[] = [];
 
   for (const timeOff of timeOffData) {
-    const { startDate, endDate, timeOffPeriod, user, time, status } = timeOff;
+    const { startDate, endDate, timeOffPeriod, user, time, status, days } = timeOff;
     const formatedTime: number = time ? time / 3600 : 0;
     const summary = createSummary(status, user.name, timeOffPeriod, formatedTime);
+    const oneDayEndLater : string = getOneEndDayLater(endDate);
+    const comparedEndDate: string = days > 1 ? oneDayEndLater.toString() : endDate;
     // eslint-disable-next-line array-callback-return
     for (const event of existingEvents) {
       if (event.summary === summary
         && event?.start?.date === startDate
-        && event?.end?.date === endDate
+        && event?.end?.date === comparedEndDate
       ) {
         shouldUpdateEvents.push({ ...timeOff, eventId: event.id });
+        const eventStatus: string = extractStatus(event?.description as string);
+        if (status === 'approved' && eventStatus !== 'approved') {
+          shouldSendReport.push(timeOff);
+        }
       }
     }
   }
@@ -128,12 +149,11 @@ export async function handleEvent(
       && timeOffItem.timeOffDurationType === timeOffUpdatedItem.timeOffDurationType);
   });
 
-  logger('shouldUpdateEvents', shouldUpdateEvents.length);
-  logger('shouldInsertedEvents', shouldInsertedEvents.length);
-  logger('shouldDeleteEvents', shouldDeleteEvents.length);
-
   for (const newEvent of shouldInsertedEvents) {
     await insertEvent(calendar, newEvent, timeOffCalendarId);
+    if (newEvent.status === 'approved') {
+      shouldSendReport.push(newEvent);
+    }
   }
   for (const existEvent of shouldUpdateEvents) {
     await updateEvent(calendar, existEvent, timeOffCalendarId);
@@ -141,4 +161,12 @@ export async function handleEvent(
   for (const event of shouldDeleteEvents) {
     await deleteEvent(calendar, event?.id, timeOffCalendarId);
   }
+  for (const timeOffItem of shouldSendReport) {
+    await postReportMessage(timeOffItem);
+  }
+
+  logger('shouldUpdateEvents', shouldUpdateEvents.length);
+  logger('shouldInsertedEvents', shouldInsertedEvents.length);
+  logger('shouldDeleteEvents', shouldDeleteEvents.length);
+  logger('shouldSendReport', shouldSendReport.length);
 }
