@@ -126,12 +126,16 @@ export function createReportMessage(
 
   if (formatedDateRangeArray.length === 1 && formatedDateRangeArray[0] === 'Today') {
     days = ` ${formatedDateRangeArray[0]}`;
+  } else if (formatedDateRangeArray.length === 1 && formatedDateRangeArray[0] === 'Tomorrow') {
+    days = ` ${formatedDateRangeArray[0]}`;
   } else if (formatedDateRangeArray.length === 2 && formatedDateRangeArray[1] === 'Tomorrow') {
     days = ` ${formatedDateRangeArray[0]} and ${formatedDateRangeArray[1]}`;
   } else if (formatedDateRangeArray.length === 1 && formatedDateRangeArray[0] !== 'Today') {
     days = ` on ${formatedDateRangeArray.join(', ')}`;
   } else if (formatedDateRangeArray.length === 2 && formatedDateRangeArray[0] !== 'Tomorrow') {
     days = ` on ${formatedDateRangeArray.join(', ')}`;
+  } else if (formatedDateRangeArray.length === 2 && formatedDateRangeArray[0] === 'Tomorrow') {
+    days = `${formatedDateRangeArray[0]}, on ${formatedDateRangeArray.join(', ')}`;
   } else if (formatedDateRangeArray.length > 2
     && formatedDateRangeArray[0] === 'Today'
     && formatedDateRangeArray[1] === 'Tomorrow'
