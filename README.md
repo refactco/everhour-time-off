@@ -76,7 +76,7 @@ Here are the steps you should follow to get started on this project:
   3. Clone the `main` branch of this repository.
   4. Install node modules using `npm i` command.
   5. Set the environment variables on `serverless.yml`  based on `serverless.example.yml` file.
-     * EVER_HOUR_API: The base URL for the Everhour API (https://api.everhour.com). This variable specifies the endpoint where the integration will communicate with Everhour to retrieve time-off events and make any 
+     * **EVER_HOUR_API**: The base URL for the Everhour API (https://api.everhour.com). This variable specifies the endpoint where the integration will communicate with Everhour to retrieve time-off events and make any 
       necessary updates.
 
       * **EVER_HOUR_TOKEN**: Your Everhour API token. This token serves as an authentication credential, allowing the integration to access your Everhour account and perform actions on your behalf.
