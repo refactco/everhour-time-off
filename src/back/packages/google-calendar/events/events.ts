@@ -36,7 +36,7 @@ export async function insertEvent(
   ) {
   const { startDate, endDate, note, status, timeOffPeriod, user, time, approvedBy, days } = timeOffInfo;
   const formatedTime: number = time ? time / 3600 : 0;
-  const summary = createSummary(status, user.name, timeOffPeriod, formatedTime);
+  const summary: string = createSummary(status, user.name, timeOffPeriod, formatedTime);
   const oneDayEndLater : string = getOneEndDayLater(endDate);
   const event = {
     'summary': summary,
@@ -118,7 +118,7 @@ export async function handleEvent(
   for (const timeOff of timeOffData) {
     const { startDate, endDate, timeOffPeriod, user, time, status, days } = timeOff;
     const formatedTime: number = time ? time / 3600 : 0;
-    const summary = createSummary(status, user.name, timeOffPeriod, formatedTime);
+    const summary: string = createSummary(status, user.name, timeOffPeriod, formatedTime);
     const oneDayEndLater : string = getOneEndDayLater(endDate);
     const comparedEndDate: string = days > 1 ? oneDayEndLater.toString() : endDate;
     // eslint-disable-next-line array-callback-return
@@ -150,23 +150,27 @@ export async function handleEvent(
   });
 
   for (const newEvent of shouldInsertedEvents) {
-    await insertEvent(calendar, newEvent, timeOffCalendarId);
+    if (process.env.ENABLE_SYNC_TIME_OFF_WITH_CALENDAR === 'true') {
+      await insertEvent(calendar, newEvent, timeOffCalendarId);
+    }
     if (newEvent.status === 'approved') {
       shouldSendReport.push(newEvent);
     }
   }
-  for (const existEvent of shouldUpdateEvents) {
-    await updateEvent(calendar, existEvent, timeOffCalendarId);
-  }
-  for (const event of shouldDeleteEvents) {
-    await deleteEvent(calendar, event?.id, timeOffCalendarId);
-  }
-  for (const timeOffItem of shouldSendReport) {
-    await postReportMessage(timeOffItem);
+
+  if (process.env.ENABLE_SYNC_TIME_OFF_WITH_CALENDAR === 'true') {
+    for (const existEvent of shouldUpdateEvents) {
+      await updateEvent(calendar, existEvent, timeOffCalendarId);
+    }
+
+    for (const event of shouldDeleteEvents) {
+      await deleteEvent(calendar, event?.id, timeOffCalendarId);
+    }
   }
 
-  logger('shouldUpdateEvents', shouldUpdateEvents.length);
-  logger('shouldInsertedEvents', shouldInsertedEvents.length);
-  logger('shouldDeleteEvents', shouldDeleteEvents.length);
-  logger('shouldSendReport', shouldSendReport.length);
+  if (process.env.ENABLE_SLACK_TIME_OFF_REPORT_CHANNLE === 'true') {
+    for (const timeOffItem of shouldSendReport) {
+      await postReportMessage(timeOffItem);
+    }
+  }
 }

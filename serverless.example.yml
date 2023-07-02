@@ -5,12 +5,16 @@ provider:
   name: aws
   timeout: 30
   environment:
-    EVER_HOUR_API: 
+    EVER_HOUR_API: https://api.everhour.com
     EVER_HOUR_TOKEN: 
     TIME_ZONE: 
     SLACK_BOT_TOKEN: 
     REPORT_CHANNEL_ID: 
-    CALENDAR_NAME: Time Off
+    CALENDAR_NAME: 
+    ENABLE_SYNC_TIME_OFF_WITH_CALENDAR: true
+    ENABLE_SLACK_TIME_OFF_REPORT_CHANNLE: true 
+    ENABLE_DAILY_TIME_OFF_REPORT: true
+    ENABLE_WEEKLY_TIME_OFF_REPORT: true
   runtime: nodejs18.x
 
 	
