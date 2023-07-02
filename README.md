@@ -1,4 +1,4 @@
-﻿﻿﻿# Everhour Integration with Google Calendar and Slack  
+﻿# Everhour Integration with Google Calendar and Slack   
  This repository provides integration between Everhour, Google Calendar, and Slack to streamline time-off management and reporting. The integration allows users to enable or disable various features to enhance their time-off tracking experience.
 ## Features
 The integration offers the following features, all of which are enabled by default. However, you have the flexibility to disable specific features by configuring the environment variables:
