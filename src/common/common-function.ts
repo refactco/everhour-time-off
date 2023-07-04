@@ -134,16 +134,15 @@ export function createReportMessage(
     days = ` on ${formatedDateRangeArray.join(', ')}`;
   } else if (formatedDateRangeArray.length === 2 && formatedDateRangeArray[0] !== 'Tomorrow') {
     days = ` on ${formatedDateRangeArray.join(', ')}`;
-  } else if (formatedDateRangeArray.length === 2 && formatedDateRangeArray[0] === 'Tomorrow') {
-    days = `${formatedDateRangeArray[0]}, on ${formatedDateRangeArray.join(', ')}`;
+  } else if (formatedDateRangeArray.length > 1 && formatedDateRangeArray[0] === 'Tomorrow') {
+    days = `${formatedDateRangeArray[0]}, on ${formatedDateRangeArray.splice(1).join(', ')}`;
   } else if (formatedDateRangeArray.length > 2
     && formatedDateRangeArray[0] === 'Today'
     && formatedDateRangeArray[1] === 'Tomorrow'
     )
     {
-    const lastDate = [...formatedDateRangeArray].splice(0, 1);
-    logger(formatedDateRangeArray);
-    const formattedDates = lastDate.join(', ');
+    const lastDate: string[] = [...formatedDateRangeArray].splice(2);
+    const formattedDates: string = lastDate.join(', ');
     days = ` ${formatedDateRangeArray[0]}, ${formatedDateRangeArray[1]}, on ${formattedDates})`;
   } else {
     days = ` on ${formatedDateRangeArray.join(', ')}`;
