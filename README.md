@@ -1,5 +1,5 @@
-﻿# Everhour Integration with Google Calendar and Slack   
- This repository provides integration between Everhour, Google Calendar, and Slack to streamline time-off management and reporting. The integration allows users to enable or disable various features to enhance their time-off tracking experience.
+﻿# Everhour Time Off Integration with Google Calendar and Slack   
+ This repository provides an [AWS Lambda](https://aws.amazon.com/lambda/) function-based integration between [Everhour Time Off](https://support.everhour.com/article/455-time-off-basics), [Google Calendar](https://calendar.google.com/), and [Slack](https://slack.com/) to streamline time-off management and reporting. The integration allows users to enable or disable various features to enhance their time-off tracking experience.
 ## Features
 The integration offers the following features, all of which are enabled by default. However, you have the flexibility to disable specific features by configuring the environment variables:
 
@@ -15,19 +15,19 @@ The integration includes three scheduled Lambda functions that automate the gene
 
 1. **cronHandler**:
 
-* **Handler**: index.run  
+* **Handler**: `index.run`  
 * **Event**: Invoke Lambda function every 30 minutes  
 The cronHandler function is responsible for continuously monitoring and processing time-off events. It ensures that the integration stays up-to-date with any changes in time-off requests or settings.
 
 2. **dailyReportHandler**:
 
-* **Handler**: daily-report.run
+* **Handler**: `daily-report.run`
 * **Event**: Invoke Lambda function at 05:00 AM (UTC+0) every day  
 The dailyReportHandler function generates a daily report summarizing all time-off requests for the day. It runs once a day at a specified time and sends the report to the configured recipients.
 
 3. **weeklyReportHandler**:
 
-* **Handler**: weekly-report.run
+* **Handler**: `weekly-report.run`
 * **Event**: Invoke Lambda function at 04:30 AM (UTC+0) every Sunday  
 The weeklyReportHandler function generates a weekly report that provides an overview of all time-off requests submitted during the week. It runs once a week on Sunday at a specified time and sends the report to the configured recipients.
 
@@ -35,7 +35,7 @@ These scheduled functions ensure that the time-off reports are generated and del
 
 
 
- ## How to configure?
+ ## How to configure
 Here are the steps you should follow to get started on this project:
 ### Google Calendar API
  1. Go to [Google developer console](https://developers.google.com/workspace/guides/create-project).
