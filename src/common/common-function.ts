@@ -85,30 +85,29 @@ function getDayOrdinal(day: number): string {
   }
 }
 
-export function formatDateRange(startDate: string, endDate: string) {
-  const start = new Date(startDate);
-  const end = endDate ? new Date(endDate) : start;
+export function formatDateRange(startDate: string, endDate: string): string {
+  const start: Date = new Date(startDate);
+  const end: Date = endDate ? new Date(endDate) : start;
+  const today: Date = new Date();
+  const tomorrow: Date = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
 
   const options: Intl.DateTimeFormatOptions = { month: 'long', day: 'numeric' };
 
-  const dateRange = [];
+  const dateRange: string[] = [];
   const currentDate = new Date(start);
 
   while (currentDate <= end) {
-    const today = new Date();
-    const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
-
     if (currentDate.toDateString() === today.toDateString()) {
       dateRange.push('Today');
     } else if (currentDate.toDateString() === tomorrow.toDateString()) {
       dateRange.push('Tomorrow');
-    } else {
-      const formattedDate = currentDate.toLocaleDateString('en-US', options);
-      const dayOrdinal = getDayOrdinal(currentDate.getDate());
-      const formattedDateRange = `${formattedDate.split(' ')[0]} ${dayOrdinal}`;
-      dateRange.push(formattedDateRange);
-    }
+    } else if (currentDate > today) {
+        const formattedDate = currentDate.toLocaleDateString('en-US', options);
+        const dayOrdinal = getDayOrdinal(currentDate.getDate());
+        const formattedDateRange = `${formattedDate.split(' ')[0]} ${dayOrdinal}`;
+        dateRange.push(formattedDateRange);
+      }
 
     currentDate.setDate(currentDate.getDate() + 1);
   }
@@ -163,7 +162,7 @@ export async function postReportMessage(timeOffInfo: IGetTimeOffResponseBody): P
   });
 }
 
-export function createSummary(status: string, name: string, timeOffPeriod: string | undefined, formatedTime: number) {
+export function createSummary(status: string, name: string, timeOffPeriod: string | undefined, formatedTime: number): string {
   return `${status === 'pending' ? '[pending]' : ''}${name} [${timeOffPeriod ?? `${formatedTime.toFixed(0)}h per day`}]`;
 }
 
@@ -181,9 +180,9 @@ const newDate: string = `${year}-${month}-${day}`;
 return newDate;
 }
 
-export function extractStatus(description: string) {
-  const regex = /Status: (.+)/;
-  const match = description.match(regex);
+export function extractStatus(description: string): string {
+  const regex: RegExp = /Status: (.+)/;
+  const match: RegExpMatchArray | null = description.match(regex);
   let status: string = '';
   if (match && match.length > 1) {
     // eslint-disable-next-line prefer-destructuring
