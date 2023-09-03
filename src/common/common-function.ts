@@ -59,7 +59,7 @@ export function getWeeklyDates(): IGetDatesRespose {
 
   // One week later
   const oneWeekLater: Date = new Date();
-  oneWeekLater.setDate(today.getDate() + 7);
+  oneWeekLater.setDate(today.getDate() + 6);
   const laterYear: number = oneWeekLater.getFullYear();
   const laterMonth: string = String(oneWeekLater.getMonth() + 1).padStart(2, '0');
   const laterDay: string = String(oneWeekLater.getDate()).padStart(2, '0');
