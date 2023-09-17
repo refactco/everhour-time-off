@@ -14,10 +14,13 @@ export async function weeklyReportHandler(timeOffData:IGetTimeOffResponseBody[])
             reportMessages.push(message);
         }
     }
-    const reportMessage: string = reportMessages.join('\n\n');
 
-    await postMessage({
-        channelID: process.env.REPORT_CHANNEL_ID ?? '',
-        message: reportMessage,
-    });
+    if (reportMessages.length > 1) {
+        const reportMessage: string = reportMessages.join('\n\n');
+
+        await postMessage({
+            channelID: process.env.REPORT_CHANNEL_ID ?? '',
+            message: reportMessage,
+        });
+    }
 }
