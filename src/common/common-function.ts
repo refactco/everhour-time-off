@@ -20,12 +20,12 @@ export function getDates(): IGetDatesRespose {
   const todayDay: string = String(today.getDate()).padStart(2, '0');
   const todayFormatted: string = `${todayYear}-${todayMonth}-${todayDay}`;
 
-  // One month later
-  const oneMonthLater: Date = new Date();
-  oneMonthLater.setMonth(oneMonthLater.getMonth() + 1);
-  const laterYear: number = oneMonthLater.getFullYear();
-  const laterMonth: string = String(oneMonthLater.getMonth() + 1).padStart(2, '0');
-  const laterDay: string = String(oneMonthLater.getDate()).padStart(2, '0');
+  // Two month later
+  const twoMonthLater: Date = new Date();
+  twoMonthLater.setMonth(twoMonthLater.getMonth() + 2);
+  const laterYear: number = twoMonthLater.getFullYear();
+  const laterMonth: string = String(twoMonthLater.getMonth() + 1).padStart(2, '0');
+  const laterDay: string = String(twoMonthLater.getDate()).padStart(2, '0');
   const laterFormatted: string = `${laterYear}-${laterMonth}-${laterDay}`;
 
   return { todayFormatted, laterFormatted };
