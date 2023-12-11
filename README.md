@@ -1,6 +1,7 @@
 ﻿# Everhour Time Off Integration with Google Calendar and Slack   
  This repository provides an [AWS Lambda](https://aws.amazon.com/lambda/) function-based integration between [Everhour Time Off](https://support.everhour.com/article/455-time-off-basics), [Google Calendar](https://calendar.google.com/), and [Slack](https://slack.com/) to streamline time-off management and reporting. The integration allows users to enable or disable various features to enhance their time-off tracking experience.  
- To learn more on how this integration helps with coordinating and managing team's time off, [click here](https://refact.co/google-calendar-slack-integration-to-manage-time-off/). 
+ 
+  To learn more on how this integration helps with coordinating and managing team's time off, [click here](https://refact.co/google-calendar-slack-integration-to-manage-time-off/). 
 ## Features
 The integration offers the following features, all of which are enabled by default. However, you have the flexibility to disable specific features by configuring the environment variables:
 
